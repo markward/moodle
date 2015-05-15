@@ -51,6 +51,9 @@ require_login($course, false, $cm);
 $contextmodule = context_module::instance($cm->id);
 require_capability('mod/scorm:viewreport', $contextmodule);
 
+// Check user has group access
+scorm_require_group_access($cm, $course, $contextmodule, $userid);
+
 // Trigger a user report viewed event.
 $event = \mod_scorm\event\user_report_viewed::create(array(
     'context' => $contextmodule,
