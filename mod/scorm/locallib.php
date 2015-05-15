@@ -2014,3 +2014,38 @@ function scorm_check_launchable_sco($scorm, $scoid) {
     // Returning 0 will cause default behaviour which will find the first launchable sco in the package.
     return 0;
 }
+
+/**
+ * Verify the current user has the relevant group access
+ * to view something about another user
+ *
+ * @param stdClass $cm
+ * @param stdClass $course
+ * @param context $context
+ * @param int $userid
+ * @throws coding_exception
+ * @throws required_capability_exception
+ */
+function scorm_require_group_access(stdClass $cm, stdClass $course, context $context, $userid)
+{
+    $groupmode = groups_get_activity_groupmode($cm, $course);
+    $modinfo = get_fast_modinfo($course);
+
+    if ($groupmode == SEPARATEGROUPS &&
+        !has_capability('moodle/site:accessallgroups', $context)
+    ) {
+
+        // This will be slow - show only users that share group with me in this cm.
+        if (!$modinfo->get_groups($cm->groupingid)) {
+            debugging('you shouldn\'t be here');
+        }
+        $usersgroups = groups_get_all_groups($course->id, $userid, $cm->groupingid);
+        if (is_array($usersgroups)) {
+            $usersgroups = array_keys($usersgroups);
+            $intersect = array_intersect($usersgroups, $modinfo->get_groups($cm->groupingid));
+            if (empty($intersect)) {
+                require_capability('moodle/site:accessallgroups', $context);
+            }
+        }
+    }
+}
