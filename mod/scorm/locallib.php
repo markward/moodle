@@ -1986,7 +1986,7 @@ function scorm_require_group_access(stdClass $cm, stdClass $course, context $con
 
         // This will be slow - show only users that share group with me in this cm.
         if (!$modinfo->get_groups($cm->groupingid)) {
-            debugging('you shouldn\'t be here');
+            require_capability('moodle/site:accessallgroups', $context);
         }
         $usersgroups = groups_get_all_groups($course->id, $userid, $cm->groupingid);
         if (is_array($usersgroups)) {
